@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('csv_import_history_id')->constrained('csv_import_histories');
             $table->foreignId('preschool_id')->constrained('preschools');
-            $table->date('target_month');
+            $table->date('target_date');
             $table->enum('kind', ['waiting','children','acceptance']);
             $table->integer('zero_year_old');
             $table->integer('one_year_old');

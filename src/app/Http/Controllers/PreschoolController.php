@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\CsvImportHistory;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
-use App\Models\PreschoolMonthlyStat;
 use App\Http\Resources\PreschoolResource;
 use App\Service\FetchPreschoolListService;
 use App\Service\ImportPreschoolCsvService;
@@ -42,18 +41,19 @@ class PreschoolController
     public function importStore(Request $request)
     {
         $request->validate([
+            'target_month' => 'required|date_format:Y-m',
             'csv' => 'required|file|mimes:csv',
             'kind' => 'required|in:' . implode(',', [CsvImportHistory::KIND_WAITING, CsvImportHistory::KIND_CHILDREN, CsvImportHistory::KIND_ACCEPTANCE]),
         ]);
 
+        $targetMonth = $request->input('target_month');
         $uploadedFile = $request->file('csv');
         $kind = $request->input('kind');
 
-        app(ImportPreschoolCsvService::class)($uploadedFile, $kind);
+        app(ImportPreschoolCsvService::class)($uploadedFile, $kind, $targetMonth);
 
-        return redirect()->route('preschool.index');
+        return redirect()->route('preschool.import');
     }
-
 
     public function getStatsJson(Request $request)
     {
@@ -61,11 +61,10 @@ class PreschoolController
             'area' => 'required|string',
         ]);
 
-        $targetMonth = Carbon::now()->month;
-        $targetYear = Carbon::now()->year;
+        $targetDate = Carbon::now()->format('Y-m-d');
         $targetArea = $request->input('area');
 
-        $preschools = app(FetchPreschoolStatService::class)($targetArea, $targetYear, $targetMonth);
+        $preschools = app(FetchPreschoolStatService::class)($targetArea, $targetDate);
 
         $preschoolResources = PreschoolResource::collection($preschools);
 

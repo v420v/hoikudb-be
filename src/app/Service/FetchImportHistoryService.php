@@ -2,9 +2,7 @@
 
 namespace App\Service;
 
-use App\Models\CsvImportHistory;
 use App\Models\PreschoolMonthlyStat;
-use Illuminate\Pagination\Paginator;
 
 class FetchImportHistoryService
 {
@@ -18,10 +16,8 @@ class FetchImportHistoryService
             }])
             ->where('csv_import_history_id', $csvImportHistoryId);
 
-        // 件数を取得
         $totalCount = $query->count();
 
-        // ページネーション付きでデータを取得
         $preschoolMonthlyStats = $query->simplePaginate(self::PER_PAGE);
 
         return [

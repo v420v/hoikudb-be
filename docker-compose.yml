@@ -8,7 +8,7 @@ networks:
 
 services:
   mysql:
-    container_name: ecsite_mysql
+    container_name: mysql
     build:
       context: .
       dockerfile: ./infra/local/mysql/Dockerfile
@@ -34,7 +34,7 @@ services:
     build:
       context: .
       dockerfile: ./infra/local/ec2/Dockerfile
-    container_name: ecsite_ec2
+    container_name: ec2
     restart: unless-stopped
     volumes:
       - ./src:/var/www/html

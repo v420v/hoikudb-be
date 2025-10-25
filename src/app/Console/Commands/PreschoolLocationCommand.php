@@ -5,10 +5,11 @@ namespace App\Console\Commands;
 use App\Models\Preschool;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
-use GuzzleHttp\Client;
 use App\Models\PreschoolLocation;
 use Exception;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
+use App\Service\GoogleGeocodingService;
 
 class PreschoolLocationCommand extends Command
 {
@@ -34,40 +35,68 @@ class PreschoolLocationCommand extends Command
         $preschools = Preschool::whereDoesntHave('preschoolLocation')->select('id', 'name', 'area_info')->get();
 
         $preschoolLocations = [];
+
+        $googleGeocodingService = app(GoogleGeocodingService::class);
+
         foreach ($preschools as $preschool) {
             try {
-                $client = new Client();
+                $address = '神奈川県 横浜市 ' . $preschool->area_info . ' ' . $preschool->name;
 
-                $requestUrl = config('google-geocoder.api_url') . '?address=神奈川県 横浜市 ' . $preschool->area_info . ' ' . $preschool->name . '&key=' . config('google-geocoder.api_key') . '&language=ja';
+                $responseData = $googleGeocodingService->getCoordinates($address);
 
-                $response = $client->get($requestUrl);
-
-                if ($response->getStatusCode() !== 200) {
-                    $this->error('Failed to get location for ' . $preschool->name);
+                if (!isset($responseData['status'])) {
+                    $this->error('Invalid response format for ' . $preschool->name);
                     continue;
                 }
 
-                $responseData = json_decode($response->getBody(), true);
+                if ($responseData['status'] === 'ZERO_RESULTS') {
+                    $this->warn('No results found for: ' . $address);
+                    continue;
+                }
+
+                if ($responseData['status'] === 'OVER_QUERY_LIMIT') {
+                    $this->error('API quota exceeded. Please try again later.');
+                    break;
+                }
 
                 if ($responseData['status'] !== 'OK') {
-                    $this->error('Failed to get location for ' . $preschool->name);
+                    $this->error('API Error: ' . $responseData['status'] . ' for ' . $preschool->name);
+                    continue;
+                }
+
+                if (empty($responseData['results'])) {
+                    $this->warn('No results in response for: ' . $address);
                     continue;
                 }
 
                 ['lat' => $lat, 'lng' => $lng] = $responseData['results'][0]['geometry']['location'];
 
-                $address = $responseData['results'][0]['formatted_address'];
-
                 $preschoolLocations[] = [
                     'preschool_id' => $preschool->id,
                     'location' => DB::raw("ST_GeomFromText('POINT(" . $lng . ' ' . $lat . ")')"),
-                    'address' => $address,
+                    'address' => $responseData['results'][0]['formatted_address'],
+                    'created_at' => Carbon::now(),
+                    'updated_at' => Carbon::now(),
                 ];
+
+                $this->info($preschool->name . ' lat: ' . $lat . ' lng: ' . $lng);
+
+                if (count($preschoolLocations) >= 500) {
+                    PreschoolLocation::insert($preschoolLocations);
+                    $preschoolLocations = [];
+                }
+
+                usleep(100000);
             } catch (Exception $e) {
                 Log::error($e);
+                continue;
             }
         }
 
-        PreschoolLocation::insert($preschoolLocations);
+        if (!empty($preschoolLocations)) {
+            PreschoolLocation::insert($preschoolLocations);
+        } else {
+            $this->warn('No locations to insert.');
+        }
     }
 }

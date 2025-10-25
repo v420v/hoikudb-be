@@ -16,6 +16,7 @@ class PreschoolMonthlyStatResource extends JsonResource
     {
         return [
             'kind' => $this->kind,
+            'target_date' => $this->target_date,
             'zero_year_old' => $this->zero_year_old,
             'one_year_old' => $this->one_year_old,
             'two_year_old' => $this->two_year_old,

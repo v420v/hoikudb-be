@@ -11,7 +11,7 @@ class FetchCsvImportHistoryListService
 
     public function __invoke(): array
     {
-        $query = CsvImportHistory::select('id', 'file_name', 'kind', 'created_at');
+        $query = CsvImportHistory::select('id', 'file_name', 'kind', 'target_date', 'created_at');
 
         // 件数を取得
         $totalCount = $query->count();

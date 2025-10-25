@@ -12,7 +12,7 @@ class PreschoolMonthlyStat extends Model
     protected $fillable = [
         'csv_import_history_id',
         'preschool_id',
-        'target_month',
+        'target_date',
         'kind',
         'zero_year_old',
         'one_year_old',

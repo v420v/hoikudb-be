@@ -4,6 +4,7 @@
 
 @section('content')
   @use('App\Models\CsvImportHistory')
+  @use('Carbon\Carbon')
 
   <div class="min-h-screen bg-gray-50 py-6">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -14,6 +15,13 @@
         <div class="p-6">
           <form action="{{ route('preschool.import') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
             @csrf
+            <div class="mb-6">
+              <!--- 対象月選択 -->
+              <label for="target_month" class="block text-sm font-medium text-gray-700 mb-2">
+                対象月
+              </label>
+              <input type="month" id="target_month" name="target_month" class="w-full p-2 border border-gray-300 rounded-md bg-gray-50" value="{{ Carbon::now()->format('Y-m') }}">
+            </div>
             <!--- 種別選択 -->
             <div class="mb-6">
               <label for="kind" class="block text-sm font-medium text-gray-700 mb-2">

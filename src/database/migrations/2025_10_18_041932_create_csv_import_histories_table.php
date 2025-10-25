@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('csv_import_histories', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users');
+            $table->date('target_date');
             $table->string('file_name');
             $table->enum('kind', ['waiting','children','acceptance']);
             $table->timestamps();

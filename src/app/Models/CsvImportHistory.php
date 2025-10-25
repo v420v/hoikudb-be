@@ -11,6 +11,7 @@ class CsvImportHistory extends Model
 
     protected $fillable = [
         'user_id',
+        'target_date',
         'file_name',
         'kind',
     ];

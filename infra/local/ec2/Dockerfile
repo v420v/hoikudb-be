@@ -15,6 +15,10 @@ RUN dnf install -y php-mysqlnd php-xml php-mbstring php-json php-gd php-pdo php-
     && ln -s /usr/local/bin/supervisorctl /usr/bin/supervisorctl \
     && dnf clean all
 
+RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
+    && php composer-setup.php --install-dir=/usr/local/bin --filename=composer \
+    && php -r "unlink('composer-setup.php');"
+
 # Configure PHP-FPM to run as 'nginx' user and tweak files for development
 RUN mkdir -p /run/php-fpm \
     && sed -i 's/^user = .*/user = nginx/' /etc/php-fpm.d/www.conf \

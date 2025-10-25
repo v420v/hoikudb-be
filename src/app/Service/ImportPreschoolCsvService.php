@@ -5,7 +5,6 @@ namespace App\Service;
 use App\Models\CsvImportHistory;
 use App\Models\Preschool;
 use App\Models\PreschoolMonthlyStat;
-use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\UploadedFile;
@@ -22,17 +21,17 @@ class ImportPreschoolCsvService
         return 0;
     }
 
-    public function __invoke(UploadedFile $uploadedFile, string $kind): void
+    public function __invoke(UploadedFile $uploadedFile, string $kind, string $targetMonth): void
     {
         $user = Auth::user();
 
         $csvImportHistory = CsvImportHistory::create([
             'user_id' => $user->id,
+            'target_date' => Carbon::parse($targetMonth)->format('Y-m-d'),
             'file_name' => $uploadedFile->getClientOriginalName(),
             'kind' => $kind,
         ]);
 
-        // SPL file object 使ってんS-JISのCSVファイルをストリームで読み込む
         $file = new \SplFileObject($uploadedFile->getRealPath());
         $file->setFlags(\SplFileObject::READ_CSV | \SplFileObject::SKIP_EMPTY | \SplFileObject::DROP_NEW_LINE);
         $file->setCsvControl(',', '"', '\\');
@@ -57,10 +56,6 @@ class ImportPreschoolCsvService
             $preschool = Preschool::where('name', $utf8Line[2])->where('building_code', $utf8Line[3])->first();
 
             if (!$preschool) {
-                Log::debug([
-                    'name' => $utf8Line[2],
-                    'building_code' => $utf8Line[3],
-                ]);
                 $preschool = Preschool::create([
                     'name' => $utf8Line[2],
                     'building_code' => $utf8Line[3],
@@ -79,7 +74,7 @@ class ImportPreschoolCsvService
             $preschoolMonthlyStats[] = [
                 'csv_import_history_id' => $csvImportHistory->id,
                 'preschool_id' => $preschool->id,
-                'target_month' => Carbon::now()->format('Y-m-d'),
+                'target_date' => Carbon::parse($targetMonth)->format('Y-m-d'),
                 'kind' => $kind,
                 'zero_year_old' => $zeroYearOld,
                 'one_year_old' => $oneYearOld,

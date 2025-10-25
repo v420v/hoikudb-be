@@ -1,0 +1,44 @@
+volumes:
+  ecsite_data_mailpit:
+    name: ${VOLUME}/mailpit-data
+
+networks:
+  ecsite_network:
+    driver: bridge
+
+services:
+  mysql:
+    container_name: ecsite_mysql
+    build:
+      context: .
+      dockerfile: ./infra/local/mysql/Dockerfile
+    environment:
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    volumes:
+      - ${VOLUME}/mysql:/var/lib/mysql
+      - ${VOLUME}/mysql_log:/var/log/mysql
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$MYSQL_ROOT_PASSWORD"]
+      interval: 1s
+      timeout: 30s
+      retries: 30
+    networks:
+      - ecsite_network
+
+  ec2:
+    build:
+      context: .
+      dockerfile: ./infra/local/ec2/Dockerfile
+    container_name: ecsite_ec2
+    restart: unless-stopped
+    volumes:
+      - ./src:/var/www/html
+    ports:
+      - "80:80"
+    networks:
+      - ecsite_network

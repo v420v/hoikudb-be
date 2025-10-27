@@ -4,7 +4,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PreschoolController;
 
-Route::get('/preschool/stats', [PreschoolController::class, 'getStatsJson'])->name('preschool.stats');
+Route::middleware('guest')->group(function () {
+    Route::get('/preschool/stats', [PreschoolController::class, 'getStatsJson'])->name('preschool.stats');
+});
 
 Route::middleware('basic.auth')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');

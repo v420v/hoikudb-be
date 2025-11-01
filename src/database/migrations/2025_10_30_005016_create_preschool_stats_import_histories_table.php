@@ -11,12 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('csv_import_histories', function (Blueprint $table) {
+        Schema::create('preschool_stats_import_histories', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('data_provider_id')->constrained('data_providers');
             $table->foreignId('user_id')->constrained('users');
-            $table->date('target_date');
-            $table->string('file_name');
-            $table->enum('kind', ['waiting','children','acceptance']);
+            $table->date('target_date')->comment('対象日');
+            $table->enum('kind', ['waiting','children','acceptance'])->comment('種別');
+            $table->string('file_name')->comment('ファイル名');
             $table->timestamps();
         });
     }
@@ -26,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('csv_import_histories');
+        Schema::dropIfExists('preschool_stats_import_histories');
     }
 };

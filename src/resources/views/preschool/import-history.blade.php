@@ -12,14 +12,14 @@
             <div>
               <h3 class="text-lg font-medium text-gray-900 flex items-center gap-2">
                 <span class="inline-flex items-center px-2 py-1 rounded-md bg-blue-100 text-blue-700 text-sm font-medium">
-                  {{ $csvImportHistory->kind_ja }}
+                  {{ $preschoolStatsImportHistory->kind_ja }}
                 </span>
-                <span class="truncate" title="{{ $csvImportHistory->file_name }}">
-                  {{ $csvImportHistory->file_name }}
+                <span class="truncate" title="{{ $preschoolStatsImportHistory->file_name }}">
+                  {{ $preschoolStatsImportHistory->file_name }}
                 </span>
               </h3>
               <div class="text-sm text-gray-500 mt-1">
-                インポート日時: {{ $csvImportHistory->created_at->format('Y-m-d H:i:s') }}
+                インポート日時: {{ $preschoolStatsImportHistory->created_at->format('Y-m-d H:i:s') }}
               </div>
             </div>
             <span class="text-sm text-gray-500">全 {{ number_format($total_count) }} 件</span>
@@ -39,21 +39,21 @@
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-              @foreach ($preschoolMonthlyStats as $preschoolMonthlyStat)
+              @foreach ($preschoolStats as $preschoolStat)
                 <tr>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $preschoolMonthlyStat->preschool->name }}</td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $preschoolMonthlyStat->zero_year_old }}</td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $preschoolMonthlyStat->one_year_old }}</td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $preschoolMonthlyStat->two_year_old }}</td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $preschoolMonthlyStat->three_year_old }}</td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $preschoolMonthlyStat->four_year_old }}</td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $preschoolMonthlyStat->five_year_old }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $preschoolStat->preschool->name }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $preschoolStat->zero_year_old }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $preschoolStat->one_year_old }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $preschoolStat->two_year_old }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $preschoolStat->three_year_old }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $preschoolStat->four_year_old }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $preschoolStat->five_year_old }}</td>
                 </tr>
               @endforeach
             </tbody>
           </table>
           <div class="mt-6">
-            {{ $preschoolMonthlyStats->links() }}
+            {{ $preschoolStats->links() }}
           </div>
         </div>
       </div>

@@ -8,9 +8,12 @@ use Carbon\Carbon;
 use App\Http\Resources\PreschoolResource;
 use App\Service\FetchPreschoolListService;
 use App\Service\ImportPreschoolCsvService;
-use App\Service\FetchCsvImportHistoryListService;
-use App\Service\FetchImportHistoryService;
+use App\Service\FetchPreschoolStatsImportHistoryListService;
+use App\Service\FetchPreschoolStatsService;
 use App\Service\FetchPreschoolStatService;
+use App\Models\DataProvider;
+use App\Models\DataProviderFileConfig;
+use App\Models\PreschoolStatsImportHistory;
 
 class PreschoolController
 {
@@ -30,27 +33,37 @@ class PreschoolController
 
     public function import()
     {
-        $result = app(FetchCsvImportHistoryListService::class)();
-        
+        $result = app(FetchPreschoolStatsImportHistoryListService::class)();
+
+        $dataProviders = DataProvider::orderBy('name')->get();
+        $dataProviderFileConfigs = DataProviderFileConfig::orderBy('display_name')->get();
+
         return view('preschool.import', [
-            'csvImportHistories' => $result['csvImportHistories'],
+            'preschoolStatsImportHistories' => $result['preschoolStatsImportHistories'],
             'total_count' => $result['total_count'],
+            'dataProviders' => $dataProviders,
+            'dataProviderFileConfigs' => $dataProviderFileConfigs,
         ]);
     }
 
     public function importStore(Request $request)
     {
         $request->validate([
-            'target_month' => 'required|date_format:Y-m',
+            'target_date' => 'required|date_format:Y-m-d',
             'csv' => 'required|file|mimes:csv',
-            'kind' => 'required|in:' . implode(',', [CsvImportHistory::KIND_WAITING, CsvImportHistory::KIND_CHILDREN, CsvImportHistory::KIND_ACCEPTANCE]),
+            'kind' => 'required|in:' . implode(',', [PreschoolStatsImportHistory::KIND_WAITING, PreschoolStatsImportHistory::KIND_CHILDREN, PreschoolStatsImportHistory::KIND_ACCEPTANCE]),
+            'data_provider_id' => 'required|exists:data_providers,id',
+            'data_provider_file_config_id' => 'required|exists:data_provider_file_configs,id',
         ]);
 
-        $targetMonth = $request->input('target_month');
+        $targetDate = $request->input('target_date');
         $uploadedFile = $request->file('csv');
         $kind = $request->input('kind');
 
-        app(ImportPreschoolCsvService::class)($uploadedFile, $kind, $targetMonth);
+        $dataProviderId = (int)$request->input('data_provider_id');
+        $dataProviderFileConfigId = (int)$request->input('data_provider_file_config_id');
+
+        app(ImportPreschoolCsvService::class)($uploadedFile, $kind, $targetDate, $dataProviderFileConfigId, $dataProviderId);
 
         return redirect()->route('preschool.import');
     }
@@ -82,16 +95,16 @@ class PreschoolController
         return response()->json($geoJson);
     }
 
-    public function importHistory($csvImportHistoryId)
+    public function importHistory($preschoolStatsImportHistoryId)
     {
-        $csvImportHistory = CsvImportHistory::find($csvImportHistoryId);
+        $preschoolStatsImportHistory = PreschoolStatsImportHistory::find($preschoolStatsImportHistoryId);
 
-        $result = app(FetchImportHistoryService::class)($csvImportHistoryId);
+        $result = app(FetchPreschoolStatsService::class)($preschoolStatsImportHistory->id);
 
         return view('preschool.import-history', [
-            'preschoolMonthlyStats' => $result['preschoolMonthlyStats'],
+            'preschoolStats' => $result['preschoolStats'],
             'total_count' => $result['total_count'],
-            'csvImportHistory' => $csvImportHistory,
+            'preschoolStatsImportHistory' => $preschoolStatsImportHistory,
         ]);
     }
 }

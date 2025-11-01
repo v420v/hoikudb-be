@@ -2,26 +2,25 @@
 
 namespace App\Service;
 
-use App\Models\CsvImportHistory;
-use Illuminate\Pagination\Paginator;
+use App\Models\PreschoolStatsImportHistory;
 
-class FetchCsvImportHistoryListService
+class FetchPreschoolStatsImportHistoryListService
 {
     const PER_PAGE = 30;
 
     public function __invoke(): array
     {
-        $query = CsvImportHistory::select('id', 'file_name', 'kind', 'target_date', 'created_at');
+        $query = PreschoolStatsImportHistory::select('id', 'file_name', 'kind', 'target_date', 'created_at');
 
         // 件数を取得
         $totalCount = $query->count();
 
         // ページネーション付きでデータを取得
-        $csvImportHistories = $query->orderBy('id', 'desc')
+        $preschoolStatsImportHistories = $query->orderBy('id', 'desc')
             ->simplePaginate(self::PER_PAGE);
 
         return [
-            'csvImportHistories' => $csvImportHistories,
+            'preschoolStatsImportHistories' => $preschoolStatsImportHistories,
             'total_count' => $totalCount,
         ];
     }

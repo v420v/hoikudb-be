@@ -19,7 +19,7 @@ class PreschoolResource extends JsonResource
             'properties' => [
                 'id' => $this->id,
                 'name' => $this->name,
-                'stats' => PreschoolMonthlyStatResource::collection($this->whenLoaded('preschoolMonthlyStats')),
+                'stats' => PreschoolStatResource::collection($this->whenLoaded('preschoolStats')),
             ],
             'geometry' => PreschoolLocationResource::make($this->whenLoaded('preschoolLocation')),
         ];

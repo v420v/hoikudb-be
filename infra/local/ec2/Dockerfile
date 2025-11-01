@@ -7,7 +7,7 @@ RUN dnf update -y \
     && dnf clean all
 
 # Install additional PHP extensions and Supervisor
-RUN dnf install -y php-mysqlnd php-xml php-mbstring php-json php-gd php-pdo php-opcache \
+RUN dnf install -y php-mysqlnd php-xml php-mbstring php-json php-gd php-pdo php-opcache ncurses \
     && dnf install -y php-pecl-redis php-zip \
     && dnf install -y python3-pip \
     && pip3 install supervisor \

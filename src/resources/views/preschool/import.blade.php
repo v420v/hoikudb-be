@@ -3,7 +3,7 @@
 @section('title', 'インポート')
 
 @section('content')
-  @use('App\Models\CsvImportHistory')
+  @use('App\Models\PreschoolStatsImportHistory')
   @use('Carbon\Carbon')
 
   <div class="min-h-screen bg-gray-50 py-6">
@@ -15,12 +15,33 @@
         <div class="p-6">
           <form action="{{ route('preschool.import') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
             @csrf
+            <!-- データプロバイダ選択 -->
             <div class="mb-6">
-              <!--- 対象月選択 -->
-              <label for="target_month" class="block text-sm font-medium text-gray-700 mb-2">
-                対象月
+              <label for="data_provider_id" class="block text-sm font-medium text-gray-700 mb-2">
+                データプロバイダ
               </label>
-              <input type="month" id="target_month" name="target_month" class="w-full p-2 border border-gray-300 rounded-md bg-gray-50" value="{{ Carbon::now()->format('Y-m') }}">
+              <select id="data_provider_id" name="data_provider_id" class="w-full p-2 border border-gray-300 rounded-md bg-gray-50" required>
+                <option value="" disabled selected>選択してください</option>
+                @foreach ($dataProviders as $provider)
+                  <option value="{{ $provider->id }}">{{ $provider->name }}</option>
+                @endforeach
+              </select>
+            </div>
+            <!-- ファイル設定選択 -->
+            <div class="mb-6">
+              <label for="data_provider_file_config_id" class="block text-sm font-medium text-gray-700 mb-2">
+                ファイル設定
+              </label>
+              <select id="data_provider_file_config_id" name="data_provider_file_config_id" class="w-full p-2 border border-gray-300 rounded-md bg-gray-50" required disabled>
+                <option value="" disabled selected>データプロバイダを先に選択してください</option>
+              </select>
+            </div>
+            <div class="mb-6">
+              <!--- 対象日選択 -->
+              <label for="target_date" class="block text-sm font-medium text-gray-700 mb-2">
+                対象日
+              </label>
+              <input type="date" id="target_date" name="target_date" class="w-full p-2 border border-gray-300 rounded-md bg-gray-50" value="{{ Carbon::now()->format('Y-m-d') }}">
             </div>
             <!--- 種別選択 -->
             <div class="mb-6">
@@ -28,9 +49,9 @@
                 種別
               </label>
               <select id="kind" name="kind" class="w-full p-2 border border-gray-300 rounded-md bg-gray-50">
-                <option value="{{ CsvImportHistory::KIND_WAITING }}">{{ CsvImportHistory::KIND_JA[CsvImportHistory::KIND_WAITING] }}</option>
-                <option value="{{ CsvImportHistory::KIND_ACCEPTANCE }}">{{ CsvImportHistory::KIND_JA[CsvImportHistory::KIND_ACCEPTANCE] }}</option>
-                <option value="{{ CsvImportHistory::KIND_CHILDREN }}">{{ CsvImportHistory::KIND_JA[CsvImportHistory::KIND_CHILDREN] }}</option>
+                <option value="{{ PreschoolStatsImportHistory::KIND_WAITING }}">{{ PreschoolStatsImportHistory::KIND_JA[PreschoolStatsImportHistory::KIND_WAITING] }}</option>
+                <option value="{{ PreschoolStatsImportHistory::KIND_ACCEPTANCE }}">{{ PreschoolStatsImportHistory::KIND_JA[PreschoolStatsImportHistory::KIND_ACCEPTANCE] }}</option>
+                <option value="{{ PreschoolStatsImportHistory::KIND_CHILDREN }}">{{ PreschoolStatsImportHistory::KIND_JA[PreschoolStatsImportHistory::KIND_CHILDREN] }}</option>
               </select>
             </div>
             <div class="mb-6">
@@ -71,6 +92,7 @@
               インポート
             </button>
           </form>
+          <script type="application/json" id="all-file-configs">@json($dataProviderFileConfigs)</script>
           <script>
             // ドラッグ&ドロップ用のUX改善（オプショナル）
             document.addEventListener('DOMContentLoaded', function() {
@@ -80,6 +102,52 @@
               const selectedFileDiv = document.getElementById('selected-file');
               const fileNameSpan = document.getElementById('file-name');
               const removeFileBtn = document.getElementById('remove-file');
+
+              // プロバイダ/ファイル設定の連動
+              const providerSelect = document.getElementById('data_provider_id');
+              const fileConfigSelect = document.getElementById('data_provider_file_config_id');
+              const allFileConfigs = JSON.parse(document.getElementById('all-file-configs').textContent);
+
+              function renderFileConfigOptions(providerId) {
+                // 初期化
+                fileConfigSelect.innerHTML = '';
+                const placeholder = document.createElement('option');
+                placeholder.value = '';
+                placeholder.disabled = true;
+                placeholder.selected = true;
+                placeholder.textContent = 'ファイル設定を選択してください';
+                fileConfigSelect.appendChild(placeholder);
+
+                // 該当するconfigを追加
+                const filtered = allFileConfigs.filter(cfg => cfg.data_provider_id === Number(providerId));
+                filtered.forEach(cfg => {
+                  const opt = document.createElement('option');
+                  opt.value = cfg.id;
+                  opt.textContent = cfg.display_name;
+                  fileConfigSelect.appendChild(opt);
+                });
+
+                // 活性/非活性
+                fileConfigSelect.disabled = filtered.length === 0;
+                if (filtered.length === 0) {
+                  fileConfigSelect.innerHTML = '';
+                  const noopt = document.createElement('option');
+                  noopt.value = '';
+                  noopt.disabled = true;
+                  noopt.selected = true;
+                  noopt.textContent = '選択可能なファイル設定がありません';
+                  fileConfigSelect.appendChild(noopt);
+                }
+              }
+
+              providerSelect.addEventListener('change', function() {
+                const providerId = this.value;
+                if (providerId) {
+                  renderFileConfigOptions(providerId);
+                } else {
+                  fileConfigSelect.disabled = true;
+                }
+              });
 
               // ファイル選択時の処理
               fileInput.addEventListener('change', function() {
@@ -149,23 +217,23 @@
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-              @foreach ($csvImportHistories as $csvImportHistory)
+              @foreach ($preschoolStatsImportHistories as $preschoolStatsImportHistory)
                 <tr>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    <a class="text-blue-600 hover:text-blue-800" href="{{ route('preschool.import.history', $csvImportHistory->id) }}">{{ $csvImportHistory->file_name }}</a>
+                    <a class="text-blue-600 hover:text-blue-800" href="{{ route('preschool.import.history', $preschoolStatsImportHistory->id) }}">{{ $preschoolStatsImportHistory->file_name }}</a>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {{ $csvImportHistory->kind_ja }}
+                    {{ $preschoolStatsImportHistory->kind_ja }}
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {{ $csvImportHistory->created_at->format('Y-m-d H:i:s') }}
+                    {{ $preschoolStatsImportHistory->created_at->format('Y-m-d H:i:s') }}
                   </td>
                 </tr>
               @endforeach
             </tbody>
           </table>
           <div class="mt-4">
-            {{ $csvImportHistories->links() }}
+            {{ $preschoolStatsImportHistories->links() }}
           </div>
         </div>
       </div>

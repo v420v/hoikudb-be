@@ -19,9 +19,9 @@ class Preschool extends Model
     const STATUS_ACTIVE = 'active';
     const STATUS_INACTIVE = 'inactive';
 
-    public function preschoolMonthlyStats()
+    public function preschoolStats()
     {
-        return $this->hasMany(PreschoolMonthlyStat::class);
+        return $this->hasMany(PreschoolStat::class);
     }
 
     public function preschoolLocation()

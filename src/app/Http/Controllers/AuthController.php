@@ -36,7 +36,7 @@ class AuthController
         }
 
         throw ValidationException::withMessages([
-            'email' => 'ログイン情報が正しくありません。',
+            'email' => config('messages.auth.login_failed'),
         ]);
     }
 

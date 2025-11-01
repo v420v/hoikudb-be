@@ -17,8 +17,6 @@ use App\Models\PreschoolStatsImportHistory;
 
 class PreschoolController
 {
-    const PER_PAGE = 30;
-
     public function index(Request $request)
     {
         $filters = $request->only(['status', 'name', 'building_code']);
@@ -63,9 +61,13 @@ class PreschoolController
         $dataProviderId = (int)$request->input('data_provider_id');
         $dataProviderFileConfigId = (int)$request->input('data_provider_file_config_id');
 
-        app(ImportPreschoolCsvService::class)($uploadedFile, $kind, $targetDate, $dataProviderFileConfigId, $dataProviderId);
+        try {
+            app(ImportPreschoolCsvService::class)($uploadedFile, $kind, $targetDate, $dataProviderFileConfigId, $dataProviderId);
 
-        return redirect()->route('preschool.import');
+            return redirect()->route('preschool.import')->with('success', config('messages.import.success'));
+        } catch (\Exception $e) {
+            return redirect()->route('preschool.import')->with('error', str_replace(':message', $e->getMessage(), config('messages.import.error')));
+        }
     }
 
     public function getStatsJson(Request $request)

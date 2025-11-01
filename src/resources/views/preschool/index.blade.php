@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', '保育園管理')
+@section('title', '保育園')
 
 @section('content')
   @use('App\Models\Preschool')

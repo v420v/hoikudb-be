@@ -12,4 +12,9 @@ class DataProvider extends Model
     protected $fillable = [
         'name',
     ];
+
+    public function fileConfigs()
+    {
+        return $this->hasMany(DataProviderFileConfig::class);
+    }
 }

@@ -51,9 +51,9 @@ class ImportPreschoolCsvService
                     $file->setCsvControl($dataProviderFileConfig->delimiter, $dataProviderFileConfig->enclosure, "\\");
                     break;
                 case DataProviderFileConfig::FILE_TYPE_PDF:
-                    throw new \Exception('PDF file type is not supported');
+                    throw new \Exception(config('messages.import.file_type.pdf_not_supported'));
                 default:
-                    throw new \Exception('Invalid file type');
+                    throw new \Exception(config('messages.import.file_type.invalid_file_type'));
             }
 
             $preschoolStats = [];
@@ -81,9 +81,9 @@ class ImportPreschoolCsvService
                         'name' => $encodedLine[2],
                         'building_code' => $encodedLine[3],
                     ], [
-                        'area_info.required' => 'エリア情報が存在しません',
-                        'name.required' => '園名が存在しません',
-                        'building_code.required' => '建物コードが存在しません',
+                        'area_info.required' => config('messages.import.validation.area_info_required'),
+                        'name.required' => config('messages.import.validation.name_required'),
+                        'building_code.required' => config('messages.import.validation.building_code_required'),
                     ]);
 
                     if ($validator->fails()) {

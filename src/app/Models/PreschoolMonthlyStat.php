@@ -26,9 +26,9 @@ class PreschoolMonthlyStat extends Model
     const KIND_CHILDREN = 'children';
     const KIND_ACCEPTANCE = 'acceptance';
 
-    public function csvImportHistory()
+    public function preschoolStatsImportHistory()
     {
-        return $this->belongsTo(CsvImportHistory::class);
+        return $this->belongsTo(PreschoolStatsImportHistory::class);
     }
 
     public function preschool()

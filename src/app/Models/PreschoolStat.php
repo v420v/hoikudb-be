@@ -27,9 +27,9 @@ class PreschoolStat extends Model
     const KIND_ACCEPTANCE = 'acceptance';
 
     const KIND_JA = [
-        self::KIND_WAITING => '受け入れ可能数',
+        self::KIND_WAITING => '入所待ち児童数',
         self::KIND_CHILDREN => '入所児童数',
-        self::KIND_ACCEPTANCE => '入所待ち児童数',
+        self::KIND_ACCEPTANCE => '受け入れ可能数',
     ];
 
     public function preschoolStatsImportHistory()

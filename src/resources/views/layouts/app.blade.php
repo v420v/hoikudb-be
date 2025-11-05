@@ -14,7 +14,9 @@
     <div class="w-64 bg-gray-800 text-white flex flex-col">
       <!-- ヘッダー -->
       <div class="p-6 border-b border-gray-700">
-        <h1 class="text-xl font-bold">管理画面</h1>
+        <h1 class="text-xl font-bold relative inline-block">管理画面
+          <span class="absolute -top-1 -right-10 bg-blue-500 text-white text-xs font-semibold px-1.5 py-0.5 rounded">beta</span>
+        </h1>
       </div>
 
       <!-- ナビゲーション -->
@@ -23,26 +25,26 @@
           @auth
             <li>
               <a href="{{ route('preschool.index') }}"
-                class="flex items-center px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors {{ request()->routeIs('preschool.index') ? 'bg-blue-600' : '' }}">
+                class="flex items-center px-4 py-2 rounded-lg {{ request()->routeIs('preschool.index') ? 'bg-blue-600' : 'hover:bg-gray-700 transition-colors' }}">
                 保育園
               </a>
             </li>
             <li>
               <a href="{{ route('preschool.import') }}"
-                class="flex items-center px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors {{ request()->routeIs('preschool.import') ? 'bg-blue-600' : '' }}">
+                class="flex items-center px-4 py-2 rounded-lg {{ request()->routeIs('preschool.import') ? 'bg-blue-600' : 'hover:bg-gray-700 transition-colors' }}">
                 インポート
               </a>
             </li>
             <li>
               <a href="{{ route('data-provider.index') }}"
-                class="flex items-center px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors {{ request()->routeIs('data-provider.*') ? 'bg-blue-600' : '' }}">
+                class="flex items-center px-4 py-2 rounded-lg {{ request()->routeIs('data-provider.*') ? 'bg-blue-600' : 'hover:bg-gray-700 transition-colors' }}">
                 データプロバイダー
               </a>
             </li>
           @else
             <li>
               <a href="{{ route('login') }}"
-                class="flex items-center px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors {{ request()->routeIs('login') ? 'bg-blue-600' : '' }}">
+                class="flex items-center px-4 py-2 rounded-lg {{ request()->routeIs('login') ? 'bg-blue-600' : 'hover:bg-gray-700 transition-colors' }}">
                 ログイン
               </a>
             </li>
